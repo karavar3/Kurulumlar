@@ -1,0 +1,207 @@
+# Nibiru Testnet Node Guide
+
+![download](https://user-images.githubusercontent.com/82613690/221673641-4b932198-518c-4984-8837-6d79402b5c39.jpg)
+
+
+
+## 1. Gereksinimler
+#### Official 
+- 4 CPU
+- 16 GB RAM
+- 1000 GB SSD
+
+
+## 2. Sunucu Hazırlığı
+```
+sudo apt update && sudo apt upgrade -y
+
+sudo apt install curl git wget htop tmux build-essential jq make gcc -y
+```
+
+## 3. Go Yükleme
+```
+sudo rm -rvf /usr/local/go/
+wget https://golang.org/dl/go1.19.3.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.19.3.linux-amd64.tar.gz
+rm go1.19.3.linux-amd64.tar.gz
+echo "export PATH=\$PATH:/usr/local/go/bin" >>~/.profile
+echo "export PATH=\$PATH:\$(go env GOPATH)/bin" >>~/.profile
+source ~/.profile
+```
+
+## 4. Node Yükleme
+```
+cd $HOME
+git clone https://github.com/NibiruChain/nibiru
+cd nibiru
+git checkout v0.19.2
+make install
+nibid version
+
+```
+
+
+## 5. Zincire bağlan
+
+bir isim koymayı unutmayın!
+  
+```
+nibid init MONİKER-ADINIZ --chain-id=nibiru-itn-1 --home $HOME/.nibid
+```
+
+## 6.Genesis 
+
+Genesis'i indir
+```
+NETWORK=nibiru-itn-1
+curl -s https://networks.itn.nibiru.fi/$NETWORK/genesis > $HOME/.nibid/config/genesis.json
+
+```
+Seeds Listesini Güncelleyin
+```
+NETWORK=nibiru-itn-1
+sed -i 's|seeds =.*|seeds = "'$(curl -s https://networks.itn.nibiru.fi/$NETWORK/seeds)'"|g' $HOME/.nibid/config/config.toml
+
+```
+Minimum gaz fiyatlarını belirleyin
+```
+sed -i 's/minimum-gas-prices =.*/minimum-gas-prices = "0.025unibi"/g' $HOME/.nibid/config/app.toml
+
+```
+Ağ ile daha hızlı yetişmek için durum eşitleme parametrelerini ayarlayın (isteğe bağlı, ancak önerilir)
+```
+NETWORK=nibiru-itn-1
+sed -i 's|enable =.*|enable = true|g' $HOME/.nibid/config/config.toml
+sed -i 's|rpc_servers =.*|rpc_servers = "'$(curl -s https://networks.itn.nibiru.fi/$NETWORK/rpc_servers)'"|g' $HOME/.nibid/config/config.toml
+sed -i 's|trust_height =.*|trust_height = "'$(curl -s https://networks.itn.nibiru.fi/$NETWORK/trust_height)'"|g' $HOME/.nibid/config/config.toml
+sed -i 's|trust_hash =.*|trust_hash = "'$(curl -s https://networks.itn.nibiru.fi/$NETWORK/trust_hash)'"|g' $HOME/.nibid/config/config.toml
+```
+                                                        
+## 7. Systemd Oluşturna
+```
+sudo tee /etc/systemd/system/nibid.service > /dev/null <<EOF
+[Unit]
+Description=nibiru
+After=network-online.target
+
+[Service]
+User=$USER
+ExecStart=$(which nibid) start --home $HOME/.nibid
+Restart=on-failure
+RestartSec=3
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+
+
+## 8. Hizmeti etkinleştirin 
+
+```
+sudo systemctl daemon-reload
+sudo systemctl enable nibid
+sudo systemctl restart nibid && sudo journalctl -u nibid -f
+```
+
+## 9. Cüzdan Oluşturma
+Kayıt olurken kullandığımız cüzdanın mnemoniclerini giriniz!
+```
+nibid keys add CÜZDAN-ADINIZ --recover
+```
+
+
+## 10. Faucet
+Test token için [Discord](https://discord.gg/nibiru)
+
+## 12. Validatör oluşturmadan önce kontrol
+
+Senkronizasyon durumunu kontrol edin, düğümünüz tamamen senkronize edildikten sonra, yukarıdan gelen çıktı şunları söyleyecektir:false
+```
+nibid status 2>&1 | jq .SyncInfo
+
+```
+bakiyenizi kontrol edin
+```
+nibid query bank balances CÜZDAN-ADINIZ
+```
+Senkronize olduktan ve token aldıktan sonra Validator oluşturalım!
+
+## 11. Validator oluşturma
+Girmiş olduğunuz Moniker ve Cüzdan adlarını aşağıda yazınız!
+
+```
+nibid tx staking create-validator \
+  --amount 1000000unibi \
+  --from CÜZDAN-ADINIZ \
+  --commission-max-change-rate "0.01" \
+  --commission-max-rate "0.2" \
+  --commission-rate "0.05" \
+  --min-self-delegation "1" \
+  --pubkey  $(nibid tendermint show-validator) \
+  --moniker MONİKER-ADINIZ \
+  --chain-id $NIBIRU_CHAIN_ID \
+  --fees 10000unibi
+
+```
+# Pricefeeder Kurulumu
+
+## 1. pricefeeder ikili dosyasını kurun
+```
+curl -s https://get.nibiru.fi/pricefeeder! | bash
+
+```
+## 2. Değişkenleri Ayarlama
+Değişkenleri  FEEDER_MNEMONIC ve VALIDATOR_ADDRESS ayarlayın.
+```
+export  CHAIN_ID = "nibiru-itn-1" 
+export  GRPC_ENDPOINT = "localhost:9090" 
+export  WEBSOCKET_ENDPOINT = "ws://localhost:26657/websocket" 
+export  EXCHANGE_SYMBOLS_MAP ='{ "bitfinex": { "ubtc:uusd": "tBTCUSD", "ueth:uusd": "tETHUSD", "uusdt:uusd": "tUSTUSD" }, "binance": { "ubtc:uusd": " BTCUSD", "ueth:uusd": "ETHUSD", "uusdt:uusd": "USDTUSD", "uusdc:uusd": "USDCUSD", "uatom:uusd": "ATOMUSD", "ubnb:uusd": " BNBUSD", "uavax:uusd": "AVAXUSD", "usol:uusd": "SOLUSD", "uada:uusd": "ADAUSD", "ubtc:unusd": "BTCUSD", "ueth:unusd": " ETHUSD", "uusdt:unusd": "USDTUSD", "uusdc:unusd": "USDCUSD", "uatom:unusd": "ATOMUSD", "ubnb:unusd": "BNBUSD","uavax:unusd": "AVAXUSD", "usol:unusd": "SOLUSD", "uada:unusd": "ADAUSD" } }' 
+export  FEEDER_MNEMONIC = "<buradaki anımsatıcınız>" 
+export  VALIDATOR_ADDRESS = "nibi1valoper... "
+
+```
+## 3. Systemd Hizmetini Kurun
+```
+sudo tee /etc/systemd/system/pricefeeder.service<<EOF
+[Unit]
+Description=Nibiru Pricefeeder
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=exec
+User=<your user>
+Group=<your group>
+ExecStart=/usr/local/bin/pricefeeder
+Restart=on-failure
+ExecReload=/bin/kill -HUP $MAINPID
+KillSignal=SIGTERM
+PermissionsStartOnly=true
+LimitNOFILE=65535
+Environment=CHAIN_ID=$CHAIN_ID'
+Environment=GRPC_ENDPOINT='$GRPC_ENDPOINT'
+Environment=WEBSOCKET_ENDPOINT='$WEBSOCKET_ENDPOINT'
+Environment=EXCHANGE_SYMBOLS_MAP='$EXCHANGE_SYMBOLS_MAP'
+Environment=FEEDER_MNEMONIC='$FEEDER_MNEMONIC'
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+```
+## 3. Hizmeti etkinleştirin 
+
+```
+sudo systemctl daemon-reload && \
+sudo systemctl enable pricefeeder && \
+sudo systemctl start pricefeeder
+```
+
+
+👉[Official guide](https://nibiru.fi/docs/run-nodes/validators/pricefeeder.html#)
+
+👉[Nibiru Explorer](https://testnet.itrocket.net/nibiru/staking)
