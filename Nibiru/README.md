@@ -182,7 +182,7 @@ ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGTERM
 PermissionsStartOnly=true
 LimitNOFILE=65535
-Environment=CHAIN_ID=$CHAIN_ID'
+Environment=CHAIN_ID='$CHAIN_ID'
 Environment=GRPC_ENDPOINT='$GRPC_ENDPOINT'
 Environment=WEBSOCKET_ENDPOINT='$WEBSOCKET_ENDPOINT'
 Environment=EXCHANGE_SYMBOLS_MAP='$EXCHANGE_SYMBOLS_MAP'
