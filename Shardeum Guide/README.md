@@ -43,82 +43,32 @@ localhost kısmına kendi IP adresini girip tarayıcınıza yapıştırın.
 ```
 https://localhost:8080/ 
 ```
-Yapıştırdıktan sonra tarayıcıda hata alabilirsiniz. Bunun için gelişmiş ayarlardan izin verip, siteye git diyin. Şifrenizi 
-```
+Yapıştırdıktan sonra tarayıcıda hata alabilirsiniz. Bunun için gelişmişe tıkalyıp siteye ilerle diyin. Şifrenizi girdikten sonra
 
+<img width="1440" alt="216432965-714c474d-a742-4032-b6ca-bea7972962e1" src="https://user-images.githubusercontent.com/82613690/221599737-385b0e27-3122-4fc5-85de-12c36bd0f19b.png">
 
-## 5. Node Configuration
-```
-sed -i 's|seeds =.*|seeds = "3a445bfdbe2d0c8ee82461633aa3af31bc2b4dc0@prod-pnet-seed-node.lavanet.xyz:26656,e593c7a9ca61f5616119d6beb5bd8ef5dd28d62d@prod-pnet-seed-node2.lavanet.xyz:26656"|g' $HOME/.lava/config/config.toml
-sed -i 's/create_empty_blocks = .*/create_empty_blocks = true/g' ~/.lava/config/config.toml
-sed -i 's/create_empty_blocks_interval = ".*s"/create_empty_blocks_interval = "60s"/g' ~/.lava/config/config.toml
-sed -i 's/timeout_propose = ".*s"/timeout_propose = "60s"/g' ~/.lava/config/config.toml
-sed -i 's/timeout_commit = ".*s"/timeout_commit = "60s"/g' ~/.lava/config/config.toml
-sed -i 's/timeout_broadcast_tx_commit = ".*s"/timeout_broadcast_tx_commit = "601s"/g' ~/.lava/config/config.toml
-```
+start node diyerek node çalıştırın!
 
-## 6. Systemed Oluşturma
-```
-sudo tee /etc/systemd/system/lavad.service > /dev/null <<EOF
-[Unit]
-Description=Lava Node
-After=network-online.target
-[Service]
-User=$USER
-ExecStart=$(which lavad) start
-Restart=always
-RestartSec=180
-LimitNOFILE=infinity
-LimitNPROC=infinity
-[Install]
-WantedBy=multi-user.target
-EOF
-```
+## 5. Faucet 
+Linkinden token istemeden önce yukarıdaki görselde yer alan yere metamask adresinizi bağlayın bundan sonra metamask adresinize token isteyebilirsiniz
+https://chaindrop.org/?chainid=8082&token=0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee 
+
+## 6. Stake etme
+
+tokenlar geldikten sonra add stake diyerek stake edelim.
                                                         
-## 7. Start Synchronization
+## 7. Terminalinize geri dönün ve komutları girin
 ```
-sudo systemctl daemon-reload
-sudo systemctl start lavad
-sudo systemctl enable lavad
-sudo journalctl -u lavad -f -n 100
+operator-cli start
 ```
-Node senkronize olana kadar bekleyin. Node senkronize olduğunda "False" çıktısı almalısınız.
+Düğümünüzü aşağıdaki komutla izleyebilirsiniz
+
 ```
-lavad status 2>&1 | jq .SyncInfo
+pm2 list
 ```
+![111](https://user-images.githubusercontent.com/82613690/221606938-2663992c-992b-4fd1-81ae-d04a2f9d11d9.PNG)
 
 
-## 8. Cüzdan oluşturma ve Token İstemek
-Memoniclerinizi kaydetmeyi unutmayın!
-```
-lavad keys add wallet
-```
-Test token için [Discord](https://discord.gg/BBgprSw2vn).
-## 9. Validatör oluşturma
-```
-lavad tx staking create-validator \
-    --amount="10000ulava" \
-    --pubkey=$(lavad tendermint show-validator --home "$HOME/.lava/") \
-    --moniker="Your_Validator_Name" \
-    --chain-id=lava-testnet-1 \
-    --commission-rate="0.10" \
-    --commission-max-rate="0.20" \
-    --commission-max-change-rate="0.01" \
-    --min-self-delegation="10000" \
-    --gas="auto" \
-    --gas-adjustment "1.5" \
-    --gas-prices="0.05ulava" \
-    --home "$HOME/.lava/" \
-    --from=wallet
-```
 
 
-## 10. Node silme
-```
-sudo systemctl stop lavad
-sudo rm -rf .lava
-sudo rm -rf lava
-sudo rm -rf /go/bin/lavad
-sudo rm -rf /etc/systemd/system/lavad.service
-sudo rm -rf GHFkqmTzpdNLDd6T
-```
+👉[Official guide](https://docs.shardeum.org/node/run/validator)
