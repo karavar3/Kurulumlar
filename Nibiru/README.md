@@ -134,16 +134,16 @@ Girmiş olduğunuz Moniker ve Cüzdan adlarını aşağıda yazınız!
 
 ```
 nibid tx staking create-validator \
-  --amount 1000000unibi \
-  --from CÜZDAN-ADINIZ \
-  --commission-max-change-rate "0.01" \
-  --commission-max-rate "0.2" \
-  --commission-rate "0.05" \
-  --min-self-delegation "1" \
-  --pubkey  $(nibid tendermint show-validator) \
-  --moniker MONİKER-ADINIZ \
-  --chain-id $NIBIRU_CHAIN_ID \
-  --fees 10000unibi
+--amount 10000000unibi \
+--commission-max-change-rate "0.1" \
+--commission-max-rate "0.20" \
+--commission-rate "0.1" \
+--min-self-delegation "1" \
+--pubkey=$(nibid tendermint show-validator) \
+--moniker NODEADINIZ \
+--chain-id nibiru-itn-1 \
+--gas-prices 0.025unibi \
+--from CÜZDANADINIZ
 
 ```
 # Pricefeeder Kurulumu
