@@ -66,6 +66,7 @@ sudo tee /etc/systemd/system/namadad.service > /dev/null <<EOF
 [Unit]
 Description=namada
 After=network-online.target
+
 [Service]
 User=$USER
 WorkingDirectory=$HOME/.namada
@@ -77,6 +78,7 @@ StandardError=syslog
 Restart=always
 RestartSec=10
 LimitNOFILE=65535
+
 [Install]
 WantedBy=multi-user.target
 EOF
