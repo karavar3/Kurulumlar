@@ -71,4 +71,4 @@ pm2 list
 
 
 
-👉[Official guide](https://docs.shardeum.org/node/run/validator)
+👉[Official guide](https://docs.shardeum.org/node/run/validator) 
