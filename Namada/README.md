@@ -33,7 +33,7 @@ source ~/.profile
 ```
 ## 4. Ayarlar
 ```
-echo "export NAMADA_TAG=v0.14.2" >> ~/.bash_profile
+echo "export NAMADA_TAG=v0.14.3" >> ~/.bash_profile
 echo "export TM_HASH=v0.1.4-abciplus" >> ~/.bash_profile
 source ~/.bash_profile
 ```
@@ -52,12 +52,12 @@ cd $HOME && cp $HOME/tendermint/build/tendermint  /usr/local/bin/tendermint && c
 
 ## 5. Node Çalıştır
 ```
-echo "export CHAIN_ID=public-testnet-5.0.d25aa64ace6" >> ~/.bash_profile
+echo "export CHAIN_ID=public-public-testnet-6.0.a0266444b06" >> ~/.bash_profile
 cd $HOME && namada client utils join-network --chain-id $CHAIN_ID
 ```
 ```
-cd $HOME && wget "https://github.com/heliaxdev/anoma-network-config/releases/download/public-testnet-5.0.d25aa64ace6/public-testnet-5.0.d25aa64ace6.tar.gz"
-tar xvzf "$HOME/public-testnet-5.0.d25aa64ace6.tar.gz"
+cd $HOME && wget "https://github.com/heliaxdev/anoma-network-config/releases/download/public-testnet-5.0.d25aa64ace6/public-testnet-6.0.a0266444b06.tar.gz"
+tar xvzf "$HOME/public-testnet-6.0.a0266444b06.tar.gz"
 ```
 
 ## 6. Systemd Hizmetini Kurun
