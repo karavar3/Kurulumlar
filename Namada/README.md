@@ -39,14 +39,12 @@ go version
 echo "export NAMADA_TAG=v0.14.3" >> ~/.bash_profile
 echo "export TM_HASH=v0.1.4-abciplus" >> ~/.bash_profile
 echo "export CHAIN_ID=public-testnet-6.0.a0266444b06" >> ~/.bash_profile
+echo "export WALLET=wallet" >> ~/.bash_profile
 
 ```
 
 ## 5. bir kullanıcı hesabı oluşturun
-```
-echo "export WALLET=wallet" >> ~/.bash_profile
-namada wallet address gen --alias $WALLET
-```
+
 Not: VALIDATORADI YAZILAN KISIMI DEĞİŞTİR!!
 ```
 echo "export VALIDATOR_ALIAS=VALIDATORADI" >> ~/.bash_profile 
@@ -112,9 +110,13 @@ sudo systemctl enable namadad
 sudo systemctl start namadad
 ```
 
+## 10. Senkronize olana kadar bekleyin
+Senkronize olduğunda "catching_up": false olması lazım
+```
+curl -s localhost:26657/status
+```
 
 ## 10. Doğrulayıcı Hesabı Başlatın
-
 ```
 cd $HOME
 namada wallet address gen --alias $WALLET --unsafe-dont-encrypt
@@ -122,11 +124,11 @@ namada wallet address gen --alias $WALLET --unsafe-dont-encrypt
 ```
 cd $HOME
 namada client transfer \
-    --token NAM \
-    --amount 1000 \
-    --source faucet \
-    --target $VALIDATOR_ALIAS \
-    --signer $VALIDATOR_ALIAS
+  --source faucet \
+  --target $WALLET \
+  --token NAM \
+  --amount 1000 \
+  --signer $WALLET
    
  ```
 
@@ -145,6 +147,7 @@ namada client init-validator \
 ```
 
 ## 11. Faucet
+
 ```
 cd $HOME
 namada client transfer \
