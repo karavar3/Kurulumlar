@@ -112,9 +112,23 @@ Kayıt olurken kullandığımız cüzdanın mnemoniclerini giriniz!
 nibid keys add CÜZDAN-ADINIZ --recover
 ```
 
-
 ## 10. Faucet
 Test token için [Discord](https://discord.gg/nibiru)
+
+## 11. Snapshot (isteğe bağlı, ancak önerilir)
+```
+sudo systemctl stop nibid
+
+cp $HOME/.nibid/data/priv_validator_state.json $HOME/.nibid/priv_validator_state.json.backup 
+
+nibid tendermint unsafe-reset-all --home $HOME/.nibid --keep-addr-book 
+curl https://snapshots2-testnet.nodejumper.io/nibiru-testnet/nibiru-itn-1_2023-04-01.tar.lz4 | lz4 -dc - | tar -xf - -C $HOME/.nibid
+
+mv $HOME/.nibid/priv_validator_state.json.backup $HOME/.nibid/data/priv_validator_state.json 
+
+sudo systemctl start nibid
+sudo journalctl -u nibid -f --no-hostname -o cat
+```
 
 ## 12. Validatör oluşturmadan önce kontrol
 
@@ -125,11 +139,11 @@ nibid status 2>&1 | jq .SyncInfo
 ```
 bakiyenizi kontrol edin
 ```
-nibid query bank balances CÜZDAN-ADINIZ
+nibid query bank balances CÜZDAN-ADRESİNİZ
 ```
 Senkronize olduktan ve token aldıktan sonra Validator oluşturalım!
 
-## 11. Validator oluşturma
+## 13. Validator oluşturma
 Girmiş olduğunuz Moniker ve Cüzdan adlarını aşağıda yazınız!
 
 ```
@@ -146,6 +160,12 @@ nibid tx staking create-validator \
 --from CÜZDANADINIZ
 
 ```
+
+## 14. Log görüntüleme
+```
+sudo journalctl -u nibid -f -o cat
+```
+
 # Pricefeeder Kurulumu
 
 ## 1. pricefeeder ikili dosyasını kurun
@@ -156,12 +176,12 @@ curl -s https://get.nibiru.fi/pricefeeder! | bash
 ## 2. Değişkenleri Ayarlama
 Değişkenleri  FEEDER_MNEMONIC ve VALIDATOR_ADDRESS ayarlayın.
 ```
-export  CHAIN_ID = "nibiru-itn-1" 
-export  GRPC_ENDPOINT = "localhost:9090" 
-export  WEBSOCKET_ENDPOINT = "ws://localhost:26657/websocket" 
-export  EXCHANGE_SYMBOLS_MAP ='{ "bitfinex": { "ubtc:uusd": "tBTCUSD", "ueth:uusd": "tETHUSD", "uusdt:uusd": "tUSTUSD" }, "binance": { "ubtc:uusd": " BTCUSD", "ueth:uusd": "ETHUSD", "uusdt:uusd": "USDTUSD", "uusdc:uusd": "USDCUSD", "uatom:uusd": "ATOMUSD", "ubnb:uusd": " BNBUSD", "uavax:uusd": "AVAXUSD", "usol:uusd": "SOLUSD", "uada:uusd": "ADAUSD", "ubtc:unusd": "BTCUSD", "ueth:unusd": " ETHUSD", "uusdt:unusd": "USDTUSD", "uusdc:unusd": "USDCUSD", "uatom:unusd": "ATOMUSD", "ubnb:unusd": "BNBUSD","uavax:unusd": "AVAXUSD", "usol:unusd": "SOLUSD", "uada:unusd": "ADAUSD" } }' 
-export  FEEDER_MNEMONIC = "<buradaki anımsatıcınız>" 
-export  VALIDATOR_ADDRESS = "nibi1valoper... "
+export CHAIN_ID="nibiru-itn-1"
+export GRPC_ENDPOINT="localhost:9090"
+export WEBSOCKET_ENDPOINT="ws://localhost:26657/websocket"
+export EXCHANGE_SYMBOLS_MAP='{ "bitfinex": { "ubtc:uusd": "tBTCUSD", "ueth:uusd": "tETHUSD", "uusdt:uusd": "tUSTUSD" }, "binance": { "ubtc:uusd": "BTCUSD", "ueth:uusd": "ETHUSD", "uusdt:uusd": "USDTUSD", "uusdc:uusd": "USDCUSD", "uatom:uusd": "ATOMUSD", "ubnb:uusd": "BNBUSD", "uavax:uusd": "AVAXUSD", "usol:uusd": "SOLUSD", "uada:uusd": "ADAUSD", "ubtc:unusd": "BTCUSD", "ueth:unusd": "ETHUSD", "uusdt:unusd": "USDTUSD", "uusdc:unusd": "USDCUSD", "uatom:unusd": "ATOMUSD", "ubnb:unusd": "BNBUSD", "uavax:unusd": "AVAXUSD", "usol:unusd": "SOLUSD", "uada:unusd": "ADAUSD" } }'
+export FEEDER_MNEMONIC="CÜZDANKELİMELERİNİZİYAZIN"
+export VALIDATOR_ADDRESS="VALOPERADRESİNİZİYAZIN"
 
 ```
 ## 3. Systemd Hizmetini Kurun
@@ -192,7 +212,7 @@ WantedBy=multi-user.target
 EOF
 
 ```
-## 3. Hizmeti etkinleştirin 
+## 4. Hizmeti etkinleştirin 
 
 ```
 sudo systemctl daemon-reload && \
@@ -200,6 +220,10 @@ sudo systemctl enable pricefeeder && \
 sudo systemctl start pricefeeder
 ```
 
+## 5. Log görüntüleme
+```
+sudo journalctl -u pricefeeder -f -o cat
+```
 
 👉[Official guide](https://nibiru.fi/docs/run-nodes/validators/pricefeeder.html#)
 
