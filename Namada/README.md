@@ -17,11 +17,11 @@ sudo apt install -y uidmap dbus-user-session
 
 ## 3. Rust ve Go yükleme
 ```
-  sudo curl https://sh.rustup.rs -sSf | sh -s -- -y
-  . $HOME/.cargo/env
-  curl https://deb.nodesource.com/setup_16.x | sudo bash
-  sudo apt install cargo nodejs -y < "/dev/null"
-  cargo --version
+sudo curl https://sh.rustup.rs -sSf | sh -s -- -y
+. $HOME/.cargo/env
+curl https://deb.nodesource.com/setup_16.x | sudo bash
+sudo apt install cargo nodejs -y < "/dev/null"
+cargo --version
 ```
 ```
 sudo rm -rvf /usr/local/go/
@@ -35,16 +35,18 @@ go version
 
 ```
 ## 4. Ayarlar
+
 ```
 echo "export NAMADA_TAG=v0.14.3" >> ~/.bash_profile
 echo "export TM_HASH=v0.1.4-abciplus" >> ~/.bash_profile
 echo "export CHAIN_ID=public-testnet-6.0.a0266444b06" >> ~/.bash_profile
-echo "export WALLET=wallet" >> ~/.bash_profile
 
 ```
 
 ## 5. bir kullanıcı hesabı oluşturun
-
+```
+echo "export WALLET=wallet" >> ~/.bash_profile
+```
 Not: VALIDATORADI YAZILAN KISIMI DEĞİŞTİR!!
 ```
 echo "export VALIDATOR_ALIAS=VALIDATORADI" >> ~/.bash_profile 
@@ -64,6 +66,7 @@ make build
 ```
 ```
 cd $HOME && cp $HOME/tendermint/build/tendermint  /usr/local/bin/tendermint && cp "$HOME/namada/target/release/namada" /usr/local/bin/namada && cp "$HOME/namada/target/release/namadac" /usr/local/bin/namadac && cp "$HOME/namada/target/release/namadan" /usr/local/bin/namadan && cp "$HOME/namada/target/release/namadaw" /usr/local/bin/namadaw
+
 ```
 
 ```
