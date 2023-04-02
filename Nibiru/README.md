@@ -224,6 +224,66 @@ sudo systemctl start pricefeeder
 ```
 sudo journalctl -u pricefeeder -f -o cat
 ```
+# Faydalı Komutlar
+
+## 1. Kendinize ya da başka validatore delege etme
+```
+nibid tx staking delegate VALOPERADRESİNİZİYAZIN 1000000unibi --from CÜZDANADINIZIYAZIN --chain-id nibiru-itn-1 --gas-adjustment 1.4 --gas auto --gas-prices 0.025unibi -y
+
+```
+
+## 2. Redelege
+```
+nibid tx staking redelegate gönderenvaloper alıcıvaloperadres 10000000unibi --from CÜZDANADINIZIYAZIN --chain-id nibiru-itn-1 --gas-adjustment 1.4 --gas auto --gas-prices 0.025unibi -y
+
+```
+
+## 3. Cüzdandan cüzdana transfer
+```
+nibid tx bank send GÖNDERENADRES ALICIADRES 10000000unibi --from CÜZDANADINIZIYAZIN --chain-id nibiru-itn-1 --gas-adjustment 1.4 --gas auto --gas-prices 0.025unibi -y
+
+```
+
+## 4. Biriken Ödülleri toplama
+```
+nibid tx distribution withdraw-all-rewards --from CÜZDANADINIZIYAZIN --chain-id nibiru-itn-1 --gas-adjustment 1.4 --gas auto --gas-prices 0.025unibi -y
+
+```
+
+## 5. Oy kullanma
+```
+nibid tx gov vote 1 yes --from CÜZDANADINIZIYAZIN --chain-id nibiru-itn-1 --gas-adjustment 1.4 --gas auto --gas-prices 0.025unibi -y
+
+```
+## 6. Unjailden çıkma
+```
+nibid tx slashing unjail --from CÜZDANADINIZIYAZIN --chain-id nibiru-itn-1 --gas-adjustment 1.4 --gas auto --gas-prices 0.025unibi -y
+```
+
+## 7. Validator Düzenleme
+```
+nibid tx staking edit-validator \
+--new-moniker YENİADINIZIYAZIN \
+--identity KEYBASE.IO ID'NİZ \
+--details "AÇIKLAMA" \
+--website "WEBSİTEADRESNİZ" \
+--chain-id nibiru-itn-1 \
+--gas-prices 0.025unibi \
+--from CÜZDANADINIZ
+```
+
+## 8. Node Silme komutları
+
+```
+sudo systemctl stop nibid
+sudo systemctl disable nibid
+sudo rm /etc/systemd/system/nibi* -rf
+sudo rm $(which nibid) -rf
+sudo rm $HOME/.nibid* -rf
+sudo rm $HOME/nibiru -rf
+sed -i '/NIBIRU_/d' ~/.bash_profile
+```
+
 
 👉[Official guide](https://nibiru.fi/docs/run-nodes/validators/pricefeeder.html#)
 
