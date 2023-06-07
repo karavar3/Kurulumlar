@@ -1,0 +1,81 @@
+# Taiko Testnet Node Guide
+
+## 1. Gereksinimler
+#### Official 
+- 2 CPU
+- 4 GB RAM
+- 50 GB SSD
+
+
+## 2. Gerekli kütüphanelerin kurulumu
+
+Screen oluşturma
+```
+screen -S anasayfa
+```
+
+```
+sudo apt update && sudo apt upgrade -y
+sudo apt-get install curl
+```
+
+```
+sudo apt install docker-compose
+sudo apt install git
+```
+
+```
+sudo apt-get update && sudo apt install jq && sudo apt install apt-transport-https ca-certificates curl software-properties-common -y && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable" && sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin && sudo apt-get install docker-compose-plugin
+```
+
+## 3. Taiko kurulum
+```
+git clone https://github.com/taikoxyz/simple-taiko-node.git
+cd simple-taiko-node
+```
+
+
+
+
+```
+cd
+cd .shardeum
+./shell.sh
+operator-cli gui start
+
+```
+
+## 4. Kendi bilgisayarınızda bir tarayıcı açın
+localhost kısmına kendi IP adresini girip tarayıcınıza yapıştırın.
+```
+https://localhost:8080/ 
+```
+Yapıştırdıktan sonra tarayıcıda hata alabilirsiniz. Bunun için gelişmişe tıkalyıp siteye ilerle diyin. Şifrenizi girdikten sonra
+
+<img width="1440" alt="216432965-714c474d-a742-4032-b6ca-bea7972962e1" src="https://user-images.githubusercontent.com/82613690/221599737-385b0e27-3122-4fc5-85de-12c36bd0f19b.png">
+
+start node diyerek node çalıştırın!
+
+## 5. Faucet 
+Linkinden token istemeden önce yukarıdaki görselde yer alan yere metamask adresinizi bağlayın bundan sonra metamask adresinize token isteyebilirsiniz
+https://chaindrop.org/?chainid=8082&token=0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee 
+
+## 6. Stake etme
+
+tokenlar geldikten sonra add stake diyerek stake edelim.
+                                                        
+## 7. Terminalinize geri dönün ve komutları girin
+```
+operator-cli start
+```
+Düğümünüzü aşağıdaki komutla izleyebilirsiniz
+
+```
+pm2 list
+```
+![111](https://user-images.githubusercontent.com/82613690/221606938-2663992c-992b-4fd1-81ae-d04a2f9d11d9.PNG)
+
+
+
+
+👉[Official guide](https://docs.shardeum.org/node/run/validator) 
