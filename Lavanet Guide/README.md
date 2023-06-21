@@ -39,7 +39,7 @@ cd || return
 rm -rf lava
 git clone https://github.com/lavanet/lava
 cd lava || return
-git checkout v0.10.1
+git checkout v0.14.0
 make install
 lavad version
 ```
@@ -72,17 +72,16 @@ sed -i 's|^prometheus *=.*|prometheus = true|' $HOME/.lava/config/config.toml
 
 ## 6. Systemed Oluşturma
 ```
-sudo tee /etc/systemd/system/lavad.service > /dev/null <<EOF
+sudo tee /etc/systemd/system/lavad.service > /dev/null << EOF
 [Unit]
-Description=Lava Node
+Description=Lava Network Node
 After=network-online.target
 [Service]
 User=$USER
 ExecStart=$(which lavad) start
-Restart=always
-RestartSec=180
-LimitNOFILE=infinity
-LimitNPROC=infinity
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=10000
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -104,7 +103,7 @@ sudo systemctl stop lavad
 cp $HOME/.lava/data/priv_validator_state.json $HOME/.lava/priv_validator_state.json.backup 
 
 lavad tendermint unsafe-reset-all --home $HOME/.lava --keep-addr-book 
-curl https://snapshots1-testnet.nodejumper.io/lava-testnet/lava-testnet-1_2023-05-07.tar.lz4 | lz4 -dc - | tar -xf - -C $HOME/.lava
+curl https://snapshots1-testnet.nodejumper.io/lava-testnet/lava-testnet-1_2023-06-21.tar.lz4 | lz4 -dc - | tar -xf - -C $HOME/.lava
 
 mv $HOME/.lava/priv_validator_state.json.backup $HOME/.lava/data/priv_validator_state.json 
 
