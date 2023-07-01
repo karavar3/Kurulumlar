@@ -8,20 +8,20 @@
 
 ## 2. Sunucu Hazırlığı
 ```
+Screen -S Namada
+```
+```
 sudo apt update && sudo apt upgrade -y
 sudo apt install curl tar wget clang pkg-config git make libssl-dev libclang-dev libclang-12-dev -y
 sudo apt install jq build-essential bsdmainutils ncdu gcc git-core chrony liblz4-tool -y
 sudo apt install uidmap dbus-user-session protobuf-compiler unzip -y
-
 ```
 
 ## 3. Rust & Go & Protobuf yükleme
 
 ```
-sudo curl https://sh.rustup.rs -sSf | sh -s -- -y
-. $HOME/.cargo/env
-curl https://deb.nodesource.com/setup_18.x | sudo bash
-sudo apt install cargo nodejs -y < "/dev/null"
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
 ```
 
 ```
@@ -42,18 +42,11 @@ curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v23.3/$PR
 sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
 sudo unzip -o $PROTOC_ZIP -d /usr/local 'include/*'
 rm -f $PROTOC_ZIP
+
+protoc --version
 ```
 
-## 4. /.bash_profile içindeki değişkenleri kontrol edin ve doğru yerde gerçekleştirin
-
-```
-sed -i '/public-testnet/d' "$HOME/.bash_profile"
-sed -i '/NAMADA_TAG/d' "$HOME/.bash_profile"
-sed -i '/WALLET_ADDRESS/d' "$HOME/.bash_profile"
-sed -i '/CBFT/d' "$HOME/.bash_profile"
-```
-
-## 5. Ayarlar
+## 4. Ayarlar
 
 ```
 echo "export NAMADA_TAG=v0.17.5" >> ~/.bash_profile
@@ -61,20 +54,19 @@ echo "export CBFT=v0.37.2" >> ~/.bash_profile
 echo "export CHAIN_ID=public-testnet-10.3718993c3648" >> ~/.bash_profile
 ```
 
-## 6. bir kullanıcı hesabı oluşturun
+## 5. bir kullanıcı hesabı oluşturun
 ```
 echo "export WALLET=wallet" >> ~/.bash_profile
 ```
 Not: VALIDATORADI YAZILAN KISIMI DEĞİŞTİR!!
 ```
 echo "export BASE_DIR=$HOME/.local/share/namada" >> ~/.bash_profile
-echo "export VALIDATOR_ALIAS=VALIDATORADI" >> ~/.bash_profile 
-```
-```
+echo "export VALIDATOR_ALIAS=VALIDATORADI" >> ~/.bash_profile
+
 source ~/.bash_profile
 ```
 
-## 7. NAMADA Yükle
+## 6. NAMADA Yükle
 ```
 cd $HOME && git clone https://github.com/anoma/namada && cd namada && git checkout $NAMADA_TAG
 make build-release
@@ -97,50 +89,21 @@ cometbft version
 namada --version
 ```
 
-## 8. Ağa katıl
+## 7. Ağa katıl ve Çalıştır
+
 ```
 cd $HOME && namada client utils join-network --chain-id $CHAIN_ID
-sudo journalctl -u namadad -f -o cat 
+NAMADA_CMT_STDOUT=true namada ledger run
 ```
 
-## 9. Systemd Hizmetini Kurun
-```
-sudo tee /etc/systemd/system/namadad.service > /dev/null <<EOF
-[Unit]
-Description=namada
-After=network-online.target
-
-[Service]
-User=$USER
-WorkingDirectory=$HOME/.namada
-Environment=NAMADA_LOG=debug
-Environment=NAMADA_TM_STDOUT=true
-ExecStart=/usr/local/bin/namada --base-dir=$HOME/.namada node ledger run 
-StandardOutput=syslog
-StandardError=syslog
-Restart=always
-RestartSec=10
-LimitNOFILE=65535
-
-[Install]
-WantedBy=multi-user.target
-EOF
-```
-
-## 10. Hizmeti etkinleştirin
-```
-sudo systemctl daemon-reload
-sudo systemctl enable namadad
-sudo systemctl start namadad
-```
-
-## 11. Senkronize olana kadar bekleyin
+## 8. Senkronize olana kadar bekleyin
+Başka bir pencere aç (CTRL + A + C )
 Senkronize olduğunda "catching_up": false olması lazım
 ```
-curl -s localhost:26657/status
+curl -s localhost:26657/status | jq
 ```
 
-## 12. Doğrulayıcı Hesabı Başlatın
+## 9. Doğrulayıcı Hesabı Başlatın
 ```
 cd $HOME
 namada wallet address gen --alias $WALLET --unsafe-dont-encrypt
@@ -169,7 +132,7 @@ namada client init-validator \
 --unsafe-dont-encrypt
 ```
 
-## 13. Faucet
+## 10. Faucet
 
 ```
 cd $HOME
@@ -183,11 +146,11 @@ namada client transfer \
  ```
  Not: İşlem başına musluktan maksimum 1000 NAM alınabilir, bu nedenle daha fazlasını elde etmek için bunu birden çok kez çalıştırın
  
- ## 14. Bakiyeni kontrol et
+ ## 11. Bakiyeni kontrol et
  ```
  namada client balance --owner $VALIDATOR_ALIAS --token NAM
  ```
- ## 15. Stake işlemi
+ ## 12. Stake işlemi
  Not: enter-amount yazan kısıma miktarı girin.
  ```
  namada client bond \
