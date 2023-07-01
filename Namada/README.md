@@ -159,12 +159,8 @@ namada client transfer \
   ```
   
  # Ek olarak
- Logları Kontrol Etmek için
- ```
- journalctl -u namadad -f -o cat
- ```
-  
-  Node Silmek
+ 
+Node Silmek
  ```
 systemctl stop namadad && systemctl disable namadad
 rm /etc/systemd/system/namadad* -rf
