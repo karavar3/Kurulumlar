@@ -2,9 +2,9 @@
 ![opengraph](https://user-images.githubusercontent.com/82613690/225137742-6d599592-9773-45c0-b9b5-09240b082d40.jpg)
 
 ## 1. Gereksinimler
-- 4 CPU
-- 8 GB RAM
-- 500 GB SSD
+- Validator	32 GB	500GB-2TB*
+- Full Node	8GB DDR4	2TB
+- Light Node	TBD	TBD
 
 ## 2. Sunucu Hazırlığı
 ```
