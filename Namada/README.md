@@ -14,24 +14,33 @@ Screen -S Namada
 sudo apt update && sudo apt upgrade -y
 sudo apt install curl tar wget clang pkg-config git make libssl-dev libclang-dev libclang-12-dev -y
 sudo apt install jq build-essential bsdmainutils ncdu gcc git-core chrony liblz4-tool -y
-sudo apt install uidmap dbus-user-session protobuf-compiler unzip -y
+sudo apt install original-awk uidmap dbus-user-session protobuf-compiler unzip -y
 ```
 
 ## 3. Rust & Go & Protobuf yükleme
 
 ```
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env
+sudo apt update
+sudo curl https://sh.rustup.rs -sSf | sh -s -- -y
+. $HOME/.cargo/env
+curl https://deb.nodesource.com/setup_18.x | sudo bash
+sudo apt install cargo nodejs -y < "/dev/null"
+
+cargo --version
 ```
 
 ```
-sudo rm -rvf /usr/local/go/
-wget https://golang.org/dl/go1.19.4.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.19.4.linux-amd64.tar.gz
-rm go1.19.4.linux-amd64.tar.gz
-echo "export PATH=\$PATH:/usr/local/go/bin" >>~/.profile
-echo "export PATH=\$PATH:\$(go env GOPATH)/bin" >>~/.profile
-source ~/.profile
+if ! [ -x "$(command -v go)" ]; then
+ver="1.20.5"
+cd $HOME
+wget "https://golang.org/dl/go$ver.linux-amd64.tar.gz"
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf "go$ver.linux-amd64.tar.gz"
+rm "go$ver.linux-amd64.tar.gz"
+echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> ~/.bash_profile
+source ~/.bash_profile
+fi
+
 go version
 ```
 
@@ -49,9 +58,17 @@ protoc --version
 ## 4. Ayarlar
 
 ```
-echo "export NAMADA_TAG=v0.17.5" >> ~/.bash_profile
+sed -i '/public-testnet/d' "$HOME/.bash_profile"
+sed -i '/NAMADA_TAG/d' "$HOME/.bash_profile"
+sed -i '/WALLET_ADDRESS/d' "$HOME/.bash_profile"
+sed -i '/CBFT/d' "$HOME/.bash_profile"
+```
+
+```
+echo "export NAMADA_TAG=v0.23.2" >> ~/.bash_profile
 echo "export CBFT=v0.37.2" >> ~/.bash_profile
-echo "export CHAIN_ID=public-testnet-10.3718993c3648" >> ~/.bash_profile
+echo "export NAMADA_CHAIN_ID=public-testnet-14.5d79b6958580" >> ~/.bash_profile
+echo "export BASE_DIR=$HOME/.local/share/namada" >> ~/.bash_profile
 ```
 
 ## 5. bir kullanıcı hesabı oluşturun
@@ -67,9 +84,12 @@ source ~/.bash_profile
 ```
 
 ## 6. NAMADA Yükle
+
 ```
 cd $HOME && git clone https://github.com/anoma/namada && cd namada && git checkout $NAMADA_TAG
 make build-release
+cargo fix --lib -p namada_apps
+
 ```
 ```
 cd $HOME && git clone https://github.com/cometbft/cometbft.git && cd cometbft && git checkout $CBFT
@@ -80,7 +100,8 @@ cd $HOME && cp $HOME/cometbft/build/cometbft /usr/local/bin/cometbft && \
 cp "$HOME/namada/target/release/namada" /usr/local/bin/namada && \
 cp "$HOME/namada/target/release/namadac" /usr/local/bin/namadac && \
 cp "$HOME/namada/target/release/namadan" /usr/local/bin/namadan && \
-cp "$HOME/namada/target/release/namadaw" /usr/local/bin/namadaw
+cp "$HOME/namada/target/release/namadaw" /usr/local/bin/namadaw && \
+cp "$HOME/namada/target/release/namadar" /usr/local/bin/namadar
 
 ```
 
@@ -89,75 +110,50 @@ cometbft version
 namada --version
 ```
 
-## 7. Ağa katıl ve Çalıştır
+## 7. Systemd Oluşturma
 
 ```
-cd $HOME && namada client utils join-network --chain-id $CHAIN_ID
-NAMADA_CMT_STDOUT=true namada ledger run
-```
+sudo tee /etc/systemd/system/namadad.service > /dev/null <<EOF
+[Unit]
+Description=namada
+After=network-online.target
+[Service]
+User=$USER
+WorkingDirectory=$HOME/.local/share/namada
+Environment=TM_LOG_LEVEL=p2p:none,pex:error
+Environment=NAMADA_CMT_STDOUT=true
+ExecStart=/usr/local/bin/namada node ledger run 
+StandardOutput=syslog
+StandardError=syslog
+Restart=always
+RestartSec=10
+LimitNOFILE=65535
+[Install]
+WantedBy=multi-user.target
+EOF
 
-## 8. Senkronize olana kadar bekleyin
-Başka bir pencere aç (CTRL + A + C )
-Senkronize olduğunda "catching_up": false olması lazım
-```
-curl -s localhost:26657/status | jq
-```
-
-## 9. Doğrulayıcı Hesabı Başlatın
-```
-cd $HOME
-namada wallet address gen --alias $WALLET --unsafe-dont-encrypt
-```
-```
-cd $HOME
-namada client transfer \
-  --source faucet \
-  --target $WALLET \
-  --token NAM \
-  --amount 1000 \
-  --signer $WALLET
-   
- ```
+sudo systemctl daemon-reload
+sudo systemctl enable namadad
 
 ```
-cd $HOME
-namada client init-validator \
---alias $VALIDATOR_ALIAS \
---source $WALLET \
---commission-rate 0.05 \
---max-commission-rate-change 0.01 \
---signer $WALLET \
---gas-amount 100000000 \
---gas-token NAM \
---unsafe-dont-encrypt
-```
 
-## 10. Faucet
+## 8. PR Oluşturmak için
+
+PUBLIC_IP Kısmına sunucu IP adresinizi $ALIAS kısmına validator adınızı gireceksiniz.
 
 ```
-cd $HOME
-namada client transfer \
-    --token NAM \
-    --amount 1000 \
-    --source faucet \
-    --target $VALIDATOR_ALIAS \
-    --signer $VALIDATOR_ALIAS
-   
- ```
- Not: İşlem başına musluktan maksimum 1000 NAM alınabilir, bu nedenle daha fazlasını elde etmek için bunu birden çok kez çalıştırın
- 
- ## 11. Bakiyeni kontrol et
- ```
- namada client balance --owner $VALIDATOR_ALIAS --token NAM
- ```
- ## 12. Stake işlemi
- Not: enter-amount yazan kısıma miktarı girin.
- ```
- namada client bond \
-  --validator $VALIDATOR_ALIAS \
-  --amount <enter-amount>
-  ```
-  
+namada client utils init-genesis-validator --alias $ALIAS \
+--max-commission-rate-change 0.01 --commission-rate 0.05 \
+--net-address $PUBLIC_IP:26656
+```
+Toml dosyasının çıktısını alın
+```
+cat $HOME/.local/share/namada/pre-genesis/$ALIAS/validator.toml
+```
+Aldığınız Gentx dosyasını burada Çekme isteği oluşturun
+https://github.com/anoma/namada-testnets/pulls
+
+
  # Ek olarak
  
 Node Silmek
